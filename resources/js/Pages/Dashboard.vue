@@ -1,14 +1,14 @@
 <template>
   <v-app theme="light">
-    <v-navigation-drawer expand-on-hover rail permanent color="#3b33a4" theme="dark">
+    <v-navigation-drawer expand-on-hover rail permanent color="#4A0404" theme="dark">
       <v-list>
-        <v-list-item class="py-4" title="Açougue Manager" subtitle="Atendente: Suporte">
+        <v-list-item
+          class="py-4"
+          title="MeatFlow"
+          :subtitle="`Atendente: ${$page.props.auth.user.name}`"
+        >
           <template v-slot:prepend>
-            <v-icon
-              icon="mdi-account-circle-outline"
-              size="x-large"
-              color="white"
-            ></v-icon>
+            <v-icon icon="mdi-knife" size="x-large" color="#ffff"></v-icon>
           </template>
         </v-list-item>
       </v-list>
@@ -26,28 +26,28 @@
           @click="navegar(item)"
           class="rounded-lg mb-1 nav-item"
         />
-      </v-list>
 
-      <template v-slot:append>
-        <v-divider class="opacity-20"></v-divider>
-        <div class="pa-4 text-caption d-flex align-center">
-          <v-icon icon="mdi-account-tie" size="small" class="mr-2"></v-icon>
-          Atendente: Carlos
-        </div>
-      </template>
+        <v-list-item
+          prepend-icon="mdi-logout"
+          title="Sair do Sistema"
+          class="rounded-lg mt-4 logout-item"
+          @click="handleLogout"
+        />
+      </v-list>
     </v-navigation-drawer>
 
     <v-app-bar elevation="0" border="b" color="white" class="px-4">
-      <v-app-bar-title class="font-weight-bold text-indigo-darken-4">
-        Dashboard - Pedidos
+      <v-app-bar-title class="font-weight-bold text-red-darken-4">
+        Meat<span class="text-grey-darken-3">Flow</span> - Dashboard
       </v-app-bar-title>
       <v-spacer></v-spacer>
       <v-btn
-        color="#3b33a4"
+        color="#8D021F"
         variant="elevated"
         prepend-icon="mdi-plus"
         class="text-none px-6 font-weight-bold"
         rounded="lg"
+        @click="router.visit('/pedidos/novo')"
       >
         Novo Pedido
       </v-btn>
@@ -61,6 +61,7 @@
           border="start"
           class="mb-8 bg-white border-opacity-100 rounded-lg shadow-sm"
           icon="mdi-alert-circle-outline"
+          color="#8D021F"
         >
           <template v-slot:title>
             <span class="text-subtitle-1 font-weight-bold">3 Pedidos Atrasados!</span>
@@ -82,43 +83,15 @@
                   }}</span>
                 </template>
                 <template v-slot:append>
-                  <v-icon :icon="card.icon" :color="card.color" size="small"></v-icon>
+                  <v-icon :icon="card.icon" :color="card.hexColor" size="small"></v-icon>
                 </template>
               </v-card-item>
-              <v-card-text class="text-h4 font-weight-bold pt-0 text-indigo-darken-4">
+              <v-card-text
+                class="text-h4 font-weight-bold pt-0"
+                :style="`color: ${card.hexColor}`"
+              >
                 {{ card.value }}
               </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-
-        <v-row class="mb-6">
-          <v-col cols="12" md="7">
-            <v-card border elevation="0" class="rounded-lg pa-4 h-100">
-              <div class="text-subtitle-2 font-weight-bold mb-4 text-indigo-darken-4">
-                Pedidos por Horário
-              </div>
-              <v-sheet
-                height="200"
-                color="grey-lighten-3"
-                class="rounded d-flex align-center justify-center"
-              >
-                <v-icon icon="mdi-chart-bar" size="x-large" color="grey"></v-icon>
-              </v-sheet>
-            </v-card>
-          </v-col>
-          <v-col cols="12" md="5">
-            <v-card border elevation="0" class="rounded-lg pa-4 h-100">
-              <div class="text-subtitle-2 font-weight-bold mb-4 text-indigo-darken-4">
-                Distribuição por Status
-              </div>
-              <v-sheet
-                height="200"
-                color="grey-lighten-3"
-                class="rounded d-flex align-center justify-center"
-              >
-                <v-icon icon="mdi-chart-pie" size="x-large" color="grey"></v-icon>
-              </v-sheet>
             </v-card>
           </v-col>
         </v-row>
@@ -136,15 +109,6 @@
             </v-col>
             <v-col cols="12" md="2">
               <v-select
-                label="Data"
-                :items="['Hoje']"
-                variant="outlined"
-                density="compact"
-                hide-details
-              ></v-select>
-            </v-col>
-            <v-col cols="12" md="2">
-              <v-select
                 label="Status"
                 :items="['Todos', 'Aguardando', 'Em Preparo', 'Pronto']"
                 variant="outlined"
@@ -152,17 +116,8 @@
                 hide-details
               ></v-select>
             </v-col>
-            <v-col cols="12" md="3">
-              <v-select
-                label="Horário"
-                :items="['Manhã', 'Tarde']"
-                variant="outlined"
-                density="compact"
-                hide-details
-              ></v-select>
-            </v-col>
             <v-col cols="12" md="2">
-              <v-btn color="#3b33a4" block height="40" class="text-none font-weight-bold"
+              <v-btn color="#8D021F" block height="40" class="text-none font-weight-bold"
                 >Filtrar</v-btn
               >
             </v-col>
@@ -171,19 +126,15 @@
 
         <v-card elevation="0" border class="rounded-lg shadow-sm">
           <v-card-title class="d-flex align-center pe-2 py-3 bg-white">
-            <v-icon
-              icon="mdi-format-list-bulleted"
-              class="mr-2"
-              color="indigo-darken-4"
-            ></v-icon>
-            <span class="text-subtitle-1 font-weight-bold text-indigo-darken-4"
+            <v-icon icon="mdi-format-list-bulleted" class="mr-2" color="#8D021F"></v-icon>
+            <span class="text-subtitle-1 font-weight-bold text-grey-darken-4"
               >Listagem de Pedidos</span
             >
             <v-spacer></v-spacer>
             <v-text-field
               v-model="search"
               prepend-inner-icon="mdi-magnify"
-              label="Buscar na tabela..."
+              label="Buscar..."
               variant="solo-filled"
               flat
               density="compact"
@@ -192,18 +143,13 @@
               class="max-width-300"
             ></v-text-field>
           </v-card-title>
-
           <v-divider></v-divider>
-
           <v-data-table
             v-model:search="search"
             :headers="headers"
             :items="listaPedidos"
-            :items-per-page="5"
             hover
             class="rounded-lg"
-            no-data-text="Nenhum pedido encontrado"
-            items-per-page-text="Linhas por página"
           >
             <template v-slot:item.status="{ item }">
               <v-chip
@@ -211,35 +157,8 @@
                 size="x-small"
                 variant="flat"
                 class="font-weight-bold text-uppercase"
+                >{{ item.status }}</v-chip
               >
-                {{ item.status }}
-              </v-chip>
-            </template>
-
-            <template v-slot:item.actions="{ item }">
-              <div class="d-flex justify-center">
-                <v-btn
-                  icon="mdi-eye-outline"
-                  variant="text"
-                  size="small"
-                  color="indigo"
-                  title="Ver"
-                ></v-btn>
-                <v-btn
-                  icon="mdi-pencil-outline"
-                  variant="text"
-                  size="small"
-                  color="grey"
-                  title="Editar"
-                ></v-btn>
-                <v-btn
-                  icon="mdi-printer-outline"
-                  variant="text"
-                  size="small"
-                  color="grey"
-                  title="Imprimir"
-                ></v-btn>
-              </div>
             </template>
           </v-data-table>
         </v-card>
@@ -255,7 +174,6 @@ import { router } from "@inertiajs/vue3";
 const activeItem = ref("dashboard");
 const search = ref("");
 
-// Definição das colunas da Tabela
 const headers = [
   { title: "HORÁRIO", align: "start", key: "horario", sortable: true },
   { title: "CLIENTE", align: "start", key: "cliente", sortable: true },
@@ -271,23 +189,12 @@ const menuItems = [
     route: "/dashboard",
   },
   { title: "Pedidos", icon: "mdi-cart-outline", value: "orders", route: "/pedidos" },
-  {
-    title: "Produtos",
-    icon: "mdi-package-variant-closed",
-    value: "products",
-    route: "/produtos",
-  },
+  { title: "Produtos", icon: "mdi-food-steak", value: "products", route: "/produtos" },
   {
     title: "Clientes",
     icon: "mdi-account-group-outline",
     value: "clients",
     route: "/clientes",
-  },
-  {
-    title: "Configurações",
-    icon: "mdi-cog-outline",
-    value: "settings",
-    route: "/configuracoes",
   },
 ];
 
@@ -295,49 +202,28 @@ const listaPedidos = [
   { horario: "08:30", cliente: "João da Silva", status: "Aguardando", color: "orange" },
   { horario: "09:45", cliente: "Maria Santos", status: "Em Preparo", color: "blue" },
   { horario: "10:20", cliente: "Carlos Oliveira", status: "Pronto", color: "green" },
-  { horario: "11:00", cliente: "Ana Paula", status: "Aguardando", color: "orange" },
-  { horario: "13:30", cliente: "Ricardo Lima", status: "Pronto", color: "green" },
+];
+
+const stats = [
+  { title: "Total de Pedidos", value: 4, icon: "mdi-trending-up", hexColor: "#8D021F" },
+  { title: "Aguardando", value: 2, icon: "mdi-clock-outline", hexColor: "#fb8c00" },
+  { title: "Em Preparo", value: 1, icon: "mdi-progress-clock", hexColor: "#2196f3" },
+  { title: "Prontos", value: 1, icon: "mdi-check-circle-outline", hexColor: "#4caf50" },
 ];
 
 const navegar = (item) => {
   activeItem.value = item.value;
+  if (item.route) router.visit(item.route);
 };
 
-const stats = [
-  {
-    title: "Total de Pedidos",
-    value: 4,
-    icon: "mdi-trending-up",
-    color: "indigo",
-    hexColor: "#3b33a4",
-  },
-  {
-    title: "Aguardando",
-    value: 2,
-    icon: "mdi-clock-outline",
-    color: "orange",
-    hexColor: "#fb8c00",
-  },
-  {
-    title: "Em Preparo",
-    value: 1,
-    icon: "mdi-progress-clock",
-    color: "blue",
-    hexColor: "#2196f3",
-  },
-  {
-    title: "Prontos",
-    value: 1,
-    icon: "mdi-check-circle-outline",
-    color: "green",
-    hexColor: "#4caf50",
-  },
-];
+const handleLogout = () => {
+  router.post("/logout");
+};
 </script>
 
 <style scoped>
 .nav-item :deep(.v-list-item--active) {
-  background-color: #5c51ff !important;
+  background-color: #8d021f !important;
   color: white !important;
 }
 
@@ -345,17 +231,19 @@ const stats = [
   max-width: 300px;
 }
 
-/* Deixa o cabeçalho da data-table profissional */
 :deep(.v-data-table-header__content) {
   font-weight: bold !important;
-  color: #3b33a4 !important;
+  color: #8d021f !important;
   font-size: 0.75rem !important;
   letter-spacing: 0.5px;
 }
 
-/* Estilo para a coluna de horário */
+.logout-item {
+  color: #ffffff !important;
+}
+
 :deep(td:first-child) {
   font-weight: bold !important;
-  color: #3b33a4 !important;
+  color: #8d021f !important;
 }
 </style>
