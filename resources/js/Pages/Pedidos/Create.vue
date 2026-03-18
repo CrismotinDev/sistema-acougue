@@ -1,227 +1,268 @@
 <template>
-  <v-app theme="light">
-    <v-navigation-drawer expand-on-hover rail permanent color="#3b33a4" theme="dark">
-      <v-list>
-        <v-list-item
-          class="py-4"
-          title="Açougue Manager"
-          subtitle="Atendente: Suporte"
-          prepend-icon="mdi-account-circle-outline"
-        />
-      </v-list>
-      <v-divider class="opacity-20"></v-divider>
-      <v-list density="compact" nav>
-        <v-list-item
-          prepend-icon="mdi-view-dashboard"
-          title="Dashboard"
-          @click="router.visit('/dashboard')"
-        />
-        <v-list-item prepend-icon="mdi-cart" title="Pedidos" active />
-      </v-list>
-    </v-navigation-drawer>
+  <AuthenticatedLayout>
+    <v-container fluid class="pa-2 pa-md-4 scrollable-content">
+      <v-card border elevation="2" class="rounded-lg overflow-hidden">
+        <v-toolbar color="white" flat class="px-4 border-b" height="40">
+          <span
+            class="text-subtitle-2 font-weight-black text-red-darken-4 text-uppercase"
+          >
+            Novo Pedido
+          </span>
+        </v-toolbar>
 
-    <v-app-bar elevation="0" border="b" color="white" class="px-4">
-      <v-app-bar-title class="font-weight-bold text-indigo-darken-4 text-h5"
-        >Gestão de Pedidos</v-app-bar-title
-      >
-    </v-app-bar>
+        <v-form class="pa-3 pa-md-6">
+          <div class="compact-section-title">Identificação do Cliente</div>
+          <v-row dense class="mb-2">
+            <v-col cols="12" md="4" class="mb-1">
+              <v-autocomplete
+                label="Selecionar da base"
+                :items="['João Silva', 'Maria Oliveira']"
+                variant="outlined"
+                color="#8D021F"
+                density="compact"
+                hide-details
+              ></v-autocomplete>
+            </v-col>
+            <v-col cols="12" md="5" class="mb-1">
+              <v-text-field
+                label="Nome do Novo Cliente"
+                variant="outlined"
+                color="#8D021F"
+                density="compact"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-text-field
+                label="WhatsApp"
+                variant="outlined"
+                color="#8D021F"
+                density="compact"
+                hide-details
+              ></v-text-field>
+            </v-col>
+          </v-row>
 
-    <v-main class="bg-grey-lighten-4">
-      <v-container fluid class="pa-10" style="max-width: 1200px">
-        <v-card border elevation="4" class="rounded-xl overflow-hidden shadow-lg">
-          <v-toolbar color="white" flat class="px-6 border-b">
-            <v-icon color="indigo" class="mr-2">mdi-form-select</v-icon>
-            <span class="text-overline font-weight-bold">Preencha os dados abaixo</span>
-          </v-toolbar>
+          <v-divider class="my-4"></v-divider>
 
-          <v-form class="pa-10">
-            <div
-              class="text-subtitle-1 font-weight-bold text-indigo mb-4 d-flex align-center"
-            >
-              <v-icon size="small" class="mr-2">mdi-account-search</v-icon> Identificação
-              do Cliente
-            </div>
-
-            <v-row class="mb-6">
-              <v-col cols="12" md="6">
-                <v-autocomplete
-                  label="Selecionar cliente da base"
-                  prepend-inner-icon="mdi-database-search"
-                  :items="['João Silva', 'Maria Oliveira', 'Carlos Souza']"
-                  variant="outlined"
-                  color="indigo"
-                  placeholder="Busque por nome ou CPF..."
-                  persistent-placeholder
-                ></v-autocomplete>
-              </v-col>
-              <v-col cols="12" md="1" class="d-flex align-center justify-center">
-                <v-chip size="small" variant="tonal" color="grey">OU</v-chip>
-              </v-col>
+          <div class="compact-section-title">Itens do Pedido</div>
+          <v-card
+            color="red-lighten-5"
+            variant="flat"
+            class="pa-3 rounded-lg border-red mb-4"
+          >
+            <v-row dense align="center">
               <v-col cols="12" md="5">
-                <v-text-field
-                  label="Cliente Não Cadastrado"
-                  prepend-inner-icon="mdi-account-plus"
+                <v-select
+                  label="Produto"
+                  :items="['Picanha', 'Alcatra', 'Costela']"
+                  v-model="novoItem.produto"
                   variant="outlined"
-                  color="indigo"
-                  placeholder="Nome completo do cliente"
+                  bg-color="white"
+                  density="compact"
+                  hide-details
+                ></v-select>
+              </v-col>
+              <v-col cols="4" md="2">
+                <v-text-field
+                  label="Kg"
+                  v-model="novoItem.quantidade"
+                  type="number"
+                  variant="outlined"
+                  bg-color="white"
+                  density="compact"
+                  hide-details
                 ></v-text-field>
               </v-col>
-              <v-col cols="12">
+              <v-col cols="8" md="4">
                 <v-text-field
-                  label="Telefone de Contato"
-                  prepend-inner-icon="mdi-whatsapp"
+                  label="Observações"
+                  v-model="novoItem.obs"
                   variant="outlined"
-                  color="indigo"
-                  placeholder="(00) 00000-0000"
-                  persistent-placeholder
+                  bg-color="white"
+                  density="compact"
+                  hide-details
                 ></v-text-field>
               </v-col>
-            </v-row>
-
-            <v-divider class="mb-8"></v-divider>
-
-            <div
-              class="text-subtitle-1 font-weight-bold text-indigo mb-4 d-flex align-center"
-            >
-              <v-icon size="small" class="mr-2">mdi-food-steak</v-icon> Detalhes do Corte
-            </div>
-
-            <v-card
-              color="grey-lighten-5"
-              variant="flat"
-              class="pa-6 rounded-lg border mb-8"
-            >
-              <v-row>
-                <v-col cols="12" md="5">
-                  <v-select
-                    label="Corte / Produto"
-                    :items="[
-                      'Picanha Argentina',
-                      'Alcatra Grill',
-                      'Costela Janela',
-                      'Filé Mignon',
-                    ]"
-                    variant="solo"
-                    flat
-                    density="comfortable"
-                  ></v-select>
-                </v-col>
-                <v-col cols="12" md="3">
-                  <v-text-field
-                    label="Quantidade"
-                    suffix="Kg"
-                    variant="solo"
-                    flat
-                    density="comfortable"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" md="3">
-                  <v-text-field
-                    label="Observações"
-                    placeholder="Ex: moída 2x"
-                    variant="solo"
-                    flat
-                    density="comfortable"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" md="1" class="d-flex align-center">
-                  <v-btn color="indigo" icon="mdi-plus" elevation="2"></v-btn>
-                </v-col>
-              </v-row>
-            </v-card>
-
-            <div
-              class="text-subtitle-1 font-weight-bold text-indigo mb-4 d-flex align-center"
-            >
-              <v-icon size="small" class="mr-2">mdi-truck-delivery</v-icon> Agendamento e
-              Logística
-            </div>
-
-            <v-row class="mb-10">
-              <v-col cols="12" md="6">
-                <v-text-field
-                  label="Data de Retirada/Entrega"
-                  type="date"
-                  prepend-inner-icon="mdi-calendar"
-                  variant="outlined"
-                  color="indigo"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-text-field
-                  label="Horário Previsto"
-                  type="time"
-                  prepend-inner-icon="mdi-clock-outline"
-                  variant="outlined"
-                  color="indigo"
-                ></v-text-field>
-              </v-col>
-            </v-row>
-
-            <v-row>
-              <v-col cols="12" sm="8">
+              <v-col cols="12" md="1">
                 <v-btn
+                  color="#8D021F"
                   block
-                  size="x-large"
-                  color="#3b33a4"
-                  class="text-none font-weight-black elevation-8"
-                  rounded="xl"
-                  height="70"
+                  height="40"
+                  theme="dark"
+                  @click="adicionarItem"
+                  :disabled="!novoItem.produto || !novoItem.quantidade"
                 >
-                  <v-icon class="mr-2">mdi-check-circle</v-icon>
-                  FINALIZAR E IMPRIMIR PEDIDO
-                </v-btn>
-              </v-col>
-              <v-col cols="12" sm="4">
-                <v-btn
-                  block
-                  size="x-large"
-                  variant="outlined"
-                  color="grey-darken-1"
-                  class="text-none font-weight-bold"
-                  rounded="xl"
-                  height="70"
-                  @click="router.visit('/dashboard')"
-                >
-                  CANCELAR
+                  <v-icon>mdi-plus</v-icon>
                 </v-btn>
               </v-col>
             </v-row>
-          </v-form>
-        </v-card>
-      </v-container>
-    </v-main>
-  </v-app>
+          </v-card>
+
+          <v-expand-transition>
+            <div v-if="itensPedido.length > 0" class="mb-6">
+              <v-table density="compact" class="border rounded-lg">
+                <thead>
+                  <tr class="bg-grey-lighten-4">
+                    <th class="text-left text-caption font-weight-bold">Produto</th>
+                    <th class="text-center text-caption font-weight-bold">Qtd</th>
+                    <th class="text-left text-caption font-weight-bold">Obs</th>
+                    <th class="text-right"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(item, index) in itensPedido" :key="index">
+                    <td class="text-caption">{{ item.produto }}</td>
+                    <td class="text-center text-caption">{{ item.quantidade }}kg</td>
+                    <td class="text-caption text-grey">{{ item.obs || "-" }}</td>
+                    <td class="text-right">
+                      <v-btn
+                        icon="mdi-trash-can-outline"
+                        variant="text"
+                        color="red"
+                        size="small"
+                        @click="removerItem(index)"
+                      ></v-btn>
+                    </td>
+                  </tr>
+                </tbody>
+              </v-table>
+            </div>
+          </v-expand-transition>
+
+          <div class="compact-section-title">Agendamento</div>
+          <v-row dense class="mb-6">
+            <v-col cols="6" md="3" class="pr-1">
+              <v-text-field
+                label="Data"
+                type="date"
+                variant="outlined"
+                density="compact"
+                hide-details
+                v-model="dataPedido"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6" md="3">
+              <v-text-field
+                label="Hora"
+                type="time"
+                variant="outlined"
+                density="compact"
+                hide-details
+                v-model="horaPedido"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+
+          <v-row dense class="mt-2" justify="end">
+            <v-col cols="12" md="2">
+              <v-btn
+                block
+                color="#8D021F"
+                height="36"
+                class="text-caption font-weight-bold"
+                rounded="md"
+              >
+                <v-icon start size="small">mdi-printer</v-icon>
+                Imprimir
+              </v-btn>
+            </v-col>
+
+            <v-col cols="6" md="2">
+              <v-btn
+                block
+                variant="outlined"
+                color="orange-darken-4"
+                height="36"
+                class="text-caption font-weight-bold"
+                rounded="md"
+                @click="showDialogLimpar = true"
+                :disabled="itensPedido.length === 0"
+              >
+                Limpar
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-form>
+      </v-card>
+    </v-container>
+
+    <DialogConfirm
+      v-model="showDialogLimpar"
+      title="Limpar Pedido"
+      message="Deseja realmente remover todos os itens da lista? Esta ação não pode ser desfeita."
+      @confirm="confirmarLimpar"
+    />
+  </AuthenticatedLayout>
 </template>
 
 <script setup>
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import DialogConfirm from "@/Components/DialogConfirm.vue";
 import { router } from "@inertiajs/vue3";
+import { ref } from "vue";
+
+// Datas iniciais
+const dataHoje = new Date().toISOString().substr(0, 10);
+const horaAgora = new Date().toLocaleTimeString("pt-BR", {
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+// Estados Reativos
+const dataPedido = ref(dataHoje);
+const horaPedido = ref(horaAgora);
+const itensPedido = ref([]);
+const showDialogLimpar = ref(false);
+
+const novoItem = ref({
+  produto: null,
+  quantidade: "",
+  obs: "",
+});
+
+// Funções de Negócio
+const adicionarItem = () => {
+  if (novoItem.value.produto && novoItem.value.quantidade) {
+    itensPedido.value.push({ ...novoItem.value });
+    novoItem.value.produto = null;
+    novoItem.value.quantidade = "";
+    novoItem.value.obs = "";
+  }
+};
+
+const removerItem = (index) => {
+  itensPedido.value.splice(index, 1);
+};
+
+const confirmarLimpar = () => {
+  itensPedido.value = [];
+  showDialogLimpar.value = false;
+};
 </script>
 
 <style scoped>
-.v-container {
-  animation: fadeIn 0.5s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Deixa os labels mais fortes */
+/* Estilos mantidos conforme sua versão anterior */
 :deep(.v-label) {
-  font-weight: 600 !important;
-  color: #3b33a4 !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
 }
-
-/* Custom shadow para o card principal */
-.shadow-lg {
-  box-shadow: 0 15px 35px rgba(59, 51, 164, 0.1) !important;
+:deep(.v-field__input) {
+  font-size: 0.85rem !important;
+  min-height: 32px !important;
+}
+.compact-section-title {
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #8d021f;
+  margin-bottom: 4px;
+}
+.border-red {
+  border: 1px solid rgba(141, 2, 31, 0.15) !important;
+}
+.scrollable-content {
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
 }
 </style>
