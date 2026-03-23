@@ -8,12 +8,12 @@
               class="text-overline text-grey-darken-1"
               style="font-size: 0.7rem !important"
             >
-              Gestao de Estoque
+              Relacionamento com Clientes
             </div>
-            <h2 class="text-h6 font-weight-black text-red-darken-4">PRODUTOS</h2>
+            <h2 class="text-h6 font-weight-black text-red-darken-4">CLIENTES</h2>
             <p class="text-body-2 text-grey-darken-1 mt-1">
-              Gerencie os produtos cadastrados e mantenha o catalogo sempre organizado
-              para os pedidos.
+              Gerencie os clientes cadastrados e mantenha os dados de contato sempre
+              organizados.
             </p>
           </v-col>
 
@@ -21,11 +21,11 @@
             <v-btn
               color="#8D021F"
               theme="dark"
-              prepend-icon="mdi-plus"
+              prepend-icon="mdi-account-plus-outline"
               class="rounded-lg text-caption font-weight-bold"
-              @click="abrirDialogNovo"
+              @click="irParaCriacao"
             >
-              Novo Produto
+              Novo Cliente
             </v-btn>
           </v-col>
         </v-row>
@@ -36,7 +36,7 @@
           <v-text-field
             v-model="search"
             prepend-inner-icon="mdi-magnify"
-            label="Buscar por nome do produto"
+            label="Buscar por nome, telefone ou endereco"
             variant="outlined"
             density="compact"
             color="#8D021F"
@@ -48,13 +48,13 @@
           <v-spacer />
 
           <v-chip color="#8D021F" variant="tonal" class="font-weight-medium">
-            {{ produtos.length }} produto(s)
+            {{ clientes.length }} cliente(s)
           </v-chip>
         </v-toolbar>
 
         <v-data-table
           :headers="headers"
-          :items="produtos"
+          :items="clientes"
           :search="search"
           density="comfortable"
           hover
@@ -83,7 +83,7 @@
                   <v-list-item
                     prepend-icon="mdi-pencil-outline"
                     title="Editar"
-                    @click="editarProduto(item)"
+                    @click="editarCliente(item)"
                   />
                   <v-list-item
                     prepend-icon="mdi-trash-can-outline"
@@ -95,7 +95,6 @@
               </v-menu>
             </div>
           </template>
-
           <template #item.nome="{ item }">
             <div class="d-flex flex-column py-2">
               <span class="font-weight-bold text-grey-darken-4">
@@ -104,63 +103,32 @@
             </div>
           </template>
 
+          <template #item.telefone="{ item }">
+            <span class="text-grey-darken-3">{{ item.telefone }}</span>
+          </template>
+
+          <template #item.endereco="{ item }">
+            <span class="text-grey-darken-3">{{ item.endereco }}</span>
+          </template>
+
           <template #no-data>
             <div class="pa-10 text-center">
-              <v-icon size="40" color="grey-lighten-1"> mdi-food-off-outline </v-icon>
+              <v-icon size="40" color="grey-lighten-1"> mdi-account-off-outline </v-icon>
               <div class="text-subtitle-2 text-grey-darken-2 mt-3">
-                Nenhum produto cadastrado.
+                Nenhum cliente cadastrado.
               </div>
               <div class="text-body-2 text-grey mt-1">
-                Cadastre o primeiro produto para comecar a montar os pedidos.
+                Cadastre o primeiro cliente para comecar a organizar os atendimentos.
               </div>
             </div>
           </template>
         </v-data-table>
       </v-card>
 
-      <v-dialog v-model="dialogForm" max-width="420" persistent>
-        <v-card class="rounded-lg">
-          <v-toolbar color="#8D021F" theme="dark" density="comfortable">
-            <v-toolbar-title class="text-subtitle-2 font-weight-bold">
-              {{ form.id ? "Editar Produto" : "Novo Produto" }}
-            </v-toolbar-title>
-            <v-spacer />
-            <v-btn icon="mdi-close" variant="text" @click="fecharDialog" />
-          </v-toolbar>
-
-          <v-card-text class="pa-5">
-            <v-form @submit.prevent="salvar">
-              <v-text-field
-                v-model="form.nome"
-                label="Nome do Produto"
-                placeholder="Ex: Picanha Argentina"
-                variant="outlined"
-                density="comfortable"
-                color="#8D021F"
-                :error-messages="form.errors.nome"
-                autofocus
-              />
-
-              <v-btn
-                block
-                type="submit"
-                color="#8D021F"
-                theme="dark"
-                height="42"
-                class="rounded-lg"
-                :loading="form.processing"
-              >
-                {{ form.id ? "Salvar Alteracoes" : "Cadastrar Produto" }}
-              </v-btn>
-            </v-form>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
-
       <DialogConfirm
         v-model="showDialogDelete"
         title="Confirmar Exclusao"
-        :message="`Deseja realmente excluir o produto ${produtoParaExcluir?.nome}?`"
+        :message="`Deseja realmente excluir o cliente ${clienteParaExcluir?.nome}?`"
         @confirm="confirmarExclusao"
       />
     </v-container>
@@ -170,86 +138,47 @@
 <script setup>
 import DialogConfirm from "@/Components/DialogConfirm.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { router, useForm } from "@inertiajs/vue3";
+import { router } from "@inertiajs/vue3";
 import { ref } from "vue";
 
 defineProps({
-  produtos: {
+  clientes: {
     type: Array,
     default: () => [],
   },
 });
 
 const search = ref("");
-const dialogForm = ref(false);
 const showDialogDelete = ref(false);
-const produtoParaExcluir = ref(null);
+const clienteParaExcluir = ref(null);
 
 const headers = [
   { title: "ID", key: "id", align: "start" },
-  { title: "PRODUTO", key: "nome", align: "start" },
+  { title: "CLIENTE", key: "nome", align: "start" },
+  { title: "TELEFONE", key: "telefone", align: "start" },
+  { title: "ENDERECO", key: "endereco", align: "start" },
 ];
 
-const form = useForm({
-  id: null,
-  nome: "",
-});
-
-const abrirDialogNovo = () => {
-  form.reset();
-  form.clearErrors();
-  dialogForm.value = true;
+const irParaCriacao = () => {
+  router.get("/clientes/criar");
 };
 
-const editarProduto = (item) => {
-  form.clearErrors();
-  form.id = item.id;
-  form.nome = item.nome;
-  dialogForm.value = true;
+const editarCliente = (cliente) => {
+  router.get(`/clientes/${cliente.id}/editar`);
 };
 
-const fecharDialog = () => {
-  dialogForm.value = false;
-  form.reset();
-  form.clearErrors();
-};
-
-const salvar = () => {
-  const isEditing = Boolean(form.id);
-  const url = isEditing ? `/produtos/${form.id}` : "/produtos";
-  const method = isEditing ? "put" : "post";
-
-  router[method](url, form.data(), {
-    onStart: () => {
-      form.processing = true;
-    },
-    onFinish: () => {
-      form.processing = false;
-    },
-    onSuccess: () => fecharDialog(),
-    onError: (errors) => {
-      form.setError(errors);
-    },
-    preserveScroll: true,
-  });
-};
-
-const prepararExclusao = (item) => {
-  produtoParaExcluir.value = item;
+const prepararExclusao = (cliente) => {
+  clienteParaExcluir.value = cliente;
   showDialogDelete.value = true;
 };
 
 const confirmarExclusao = () => {
-  if (!produtoParaExcluir.value) return;
+  if (!clienteParaExcluir.value) return;
 
-  router.delete(`/produtos/${produtoParaExcluir.value.id}`, {
-    onStart: () => {
-      form.processing = true;
-    },
+  router.delete(`/clientes/${clienteParaExcluir.value.id}`, {
     onFinish: () => {
-      form.processing = false;
       showDialogDelete.value = false;
-      produtoParaExcluir.value = null;
+      clienteParaExcluir.value = null;
     },
     preserveScroll: true,
   });
