@@ -2,10 +2,9 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\ProdutoController; // Importe o novo Controller
-use App\Models\Produto; // Importe o Model
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 // Visitantes
 Route::middleware('guest')->group(function () {
@@ -15,17 +14,15 @@ Route::middleware('guest')->group(function () {
 
 // Autenticados
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [PedidoController::class, 'dashboard'])->name('dashboard');
 
     // --- ROTA DE PEDIDOS ---
-    // Alteramos para buscar os produtos do banco antes de abrir a tela
-    Route::get('/pedidos/novo', function () {
-        return Inertia::render('Pedidos/Create', [
-            'produtosCadastrados' => Produto::orderBy('nome')->get()
-        ]);
-    })->name('pedidos.create');
+    Route::get('/pedidos/novo', [PedidoController::class, 'create'])->name('pedidos.create');
+    Route::post('/pedidos', [PedidoController::class, 'store'])->name('pedidos.store');
+    Route::get('/pedidos/{pedido}/editar', [PedidoController::class, 'edit'])->name('pedidos.edit');
+    Route::get('/pedidos/{pedido}/imprimir', [PedidoController::class, 'print'])->name('pedidos.print');
+    Route::put('/pedidos/{pedido}', [PedidoController::class, 'update'])->name('pedidos.update');
+    Route::delete('/pedidos/{pedido}', [PedidoController::class, 'destroy'])->name('pedidos.destroy');
 
     // --- ROTAS DE PRODUTOS ---
 
