@@ -289,6 +289,9 @@ const props = defineProps({
   },
 });
 
+const montarEnderecoCliente = (cliente) =>
+  cliente?.endereco_completo || cliente?.endereco || "";
+
 const dataHoje = new Date().toISOString().slice(0, 10);
 const horaAgora = new Date().toLocaleTimeString("pt-BR", {
   hour: "2-digit",
@@ -365,7 +368,7 @@ const preencherClienteSelecionado = (clienteId) => {
   nomeCliente.value = cliente.nome;
   telefoneCliente.value = cliente.telefone;
   if (tipoEntrega.value === "entrega") {
-    enderecoEntrega.value = cliente.endereco ?? "";
+    enderecoEntrega.value = montarEnderecoCliente(cliente);
   }
 };
 
@@ -462,7 +465,7 @@ watch(tipoEntrega, (tipo) => {
     const cliente = props.clientesCadastrados.find(
       ({ id }) => id === clienteSelecionadoId.value
     );
-    enderecoEntrega.value = cliente?.endereco ?? enderecoEntrega.value;
+    enderecoEntrega.value = montarEnderecoCliente(cliente) || enderecoEntrega.value;
   }
 });
 </script>

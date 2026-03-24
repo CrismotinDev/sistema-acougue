@@ -22,6 +22,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pedidos/{pedido}/editar', [PedidoController::class, 'edit'])->name('pedidos.edit');
     Route::get('/pedidos/{pedido}/imprimir', [PedidoController::class, 'print'])->name('pedidos.print');
     Route::put('/pedidos/{pedido}', [PedidoController::class, 'update'])->name('pedidos.update');
+    Route::patch('/pedidos/{pedido}/finalizar', [PedidoController::class, 'finish'])->name('pedidos.finish');
     Route::delete('/pedidos/{pedido}', [PedidoController::class, 'destroy'])->name('pedidos.destroy');
 
     // --- ROTAS DE PRODUTOS ---

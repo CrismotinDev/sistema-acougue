@@ -28,8 +28,13 @@ const vuetify = createVuetify({
     }
 })
 
+const pages = import.meta.glob([
+  './Pages/*.vue',
+  './Pages/**/*.vue',
+])
+
 createInertiaApp({
-  resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),
+  resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`, pages),
   setup({ el, App, props, plugin }) {
     createApp({ render: () => h(App, props) })
       .use(plugin)

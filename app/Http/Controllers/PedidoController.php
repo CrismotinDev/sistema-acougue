@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cliente;
 use App\Models\Pedido;
 use App\Models\Produto;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -13,47 +14,92 @@ class PedidoController extends Controller
 {
     public function dashboard()
     {
+        $hoje = Carbon::today();
+        $agora = Carbon::now();
+
         $pedidos = Pedido::with('itens')
             ->latest()
-            ->take(10)
+            ->take(30)
             ->get()
-            ->map(function (Pedido $pedido) {
+            ->map(function (Pedido $pedido) use ($agora) {
+                $dataHoraEntrega = Carbon::parse("{$pedido->data_entrega} {$pedido->hora_entrega}");
+                $itens = $pedido->itens->map(function ($item) {
+                    return [
+                        'produto_nome' => $item->produto_nome,
+                        'quantidade' => (string) $item->quantidade,
+                        'observacoes' => $item->observacoes,
+                    ];
+                })->values();
+
                 return [
                     'id' => $pedido->id,
                     'cliente_nome' => $pedido->cliente_nome,
                     'cliente_telefone' => $pedido->cliente_telefone,
                     'tipo_entrega' => $pedido->tipo_entrega,
+                    'endereco_entrega' => $pedido->endereco_entrega,
                     'data_entrega' => $pedido->data_entrega,
                     'hora_entrega' => $pedido->hora_entrega,
                     'status' => $pedido->status,
                     'total_itens' => $pedido->itens->count(),
+                    'itens' => $itens,
+                    'resumo_itens' => $itens->take(2)->pluck('produto_nome')->implode(', '),
+                    'is_atrasado' => $pedido->status === 'pendente' && $dataHoraEntrega->lt($agora),
+                    'periodo_label' => $dataHoraEntrega->locale('pt_BR')->diffForHumans($agora, [
+                        'parts' => 2,
+                        'short' => true,
+                        'syntax' => Carbon::DIFF_RELATIVE_TO_NOW,
+                    ]),
+                    'created_at' => $pedido->created_at?->toDateTimeString(),
+                ];
+            });
+
+        $proximosPedidos = Pedido::with('itens')
+            ->where('status', 'pendente')
+            ->orderBy('data_entrega')
+            ->orderBy('hora_entrega')
+            ->take(5)
+            ->get()
+            ->map(function (Pedido $pedido) use ($agora) {
+                $dataHoraEntrega = Carbon::parse("{$pedido->data_entrega} {$pedido->hora_entrega}");
+
+                return [
+                    'id' => $pedido->id,
+                    'cliente_nome' => $pedido->cliente_nome,
+                    'tipo_entrega' => $pedido->tipo_entrega,
+                    'data_entrega' => $pedido->data_entrega,
+                    'hora_entrega' => $pedido->hora_entrega,
+                    'total_itens' => $pedido->itens->count(),
+                    'is_atrasado' => $dataHoraEntrega->lt($agora),
+                    'periodo_label' => $dataHoraEntrega->locale('pt_BR')->diffForHumans($agora, [
+                        'parts' => 2,
+                        'short' => true,
+                        'syntax' => Carbon::DIFF_RELATIVE_TO_NOW,
+                    ]),
                 ];
             });
 
         return Inertia::render('Dashboard', [
-            'stats' => [
-                [
-                    'title' => 'Pedidos Salvos',
-                    'value' => Pedido::count(),
-                    'hexColor' => '#8D021F',
-                ],
-                [
-                    'title' => 'Clientes',
-                    'value' => Cliente::count(),
-                    'hexColor' => '#C2410C',
-                ],
-                [
-                    'title' => 'Produtos',
-                    'value' => Produto::count(),
-                    'hexColor' => '#1D4ED8',
-                ],
-                [
-                    'title' => 'Pendentes',
-                    'value' => Pedido::where('status', 'pendente')->count(),
-                    'hexColor' => '#15803D',
-                ],
+
+            'highlights' => [
+                'pedidos_hoje' => Pedido::whereDate('data_entrega', $hoje)->count(),
+                'atrasados' => Pedido::where('status', 'pendente')
+                    ->where(function ($query) use ($agora) {
+                        $query->whereDate('data_entrega', '<', $agora->toDateString())
+                            ->orWhere(function ($sameDay) use ($agora) {
+                                $sameDay->whereDate('data_entrega', $agora->toDateString())
+                                    ->whereTime('hora_entrega', '<', $agora->format('H:i:s'));
+                            });
+                    })
+                    ->count(),
+                'entregas_hoje' => Pedido::whereDate('data_entrega', $hoje)
+                    ->where('tipo_entrega', 'entrega')
+                    ->count(),
+                'retiradas_hoje' => Pedido::whereDate('data_entrega', $hoje)
+                    ->where('tipo_entrega', 'retirada')
+                    ->count(),
             ],
             'pedidos' => $pedidos,
+            'proximosPedidos' => $proximosPedidos,
         ]);
     }
 
@@ -213,6 +259,17 @@ class PedidoController extends Controller
     public function destroy(Pedido $pedido)
     {
         $pedido->delete();
+
+        return redirect()->route('dashboard');
+    }
+
+    public function finish(Pedido $pedido)
+    {
+        if ($pedido->status !== 'concluido') {
+            $pedido->update([
+                'status' => 'concluido',
+            ]);
+        }
 
         return redirect()->route('dashboard');
     }

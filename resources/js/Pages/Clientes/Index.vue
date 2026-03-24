@@ -36,7 +36,7 @@
           <v-text-field
             v-model="search"
             prepend-inner-icon="mdi-magnify"
-            label="Buscar por nome, telefone ou endereco"
+            label="Buscar por nome, telefone, CEP ou endereco"
             variant="outlined"
             density="compact"
             color="#8D021F"
@@ -108,7 +108,7 @@
           </template>
 
           <template #item.endereco="{ item }">
-            <span class="text-grey-darken-3">{{ item.endereco }}</span>
+            <span class="text-grey-darken-3">{{ item.endereco_completo }}</span>
           </template>
 
           <template #no-data>
@@ -156,7 +156,7 @@ const headers = [
   { title: "ID", key: "id", align: "start" },
   { title: "CLIENTE", key: "nome", align: "start" },
   { title: "TELEFONE", key: "telefone", align: "start" },
-  { title: "ENDERECO", key: "endereco", align: "start" },
+  { title: "ENDERECO", key: "endereco_completo", align: "start" },
 ];
 
 const irParaCriacao = () => {

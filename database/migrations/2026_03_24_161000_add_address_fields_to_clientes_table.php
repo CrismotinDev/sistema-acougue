@@ -1,0 +1,26 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('clientes', function (Blueprint $table) {
+            $table->string('numero', 20)->nullable()->after('endereco');
+            $table->string('complemento')->nullable()->after('numero');
+            $table->string('bairro')->nullable()->after('complemento');
+            $table->string('cidade')->nullable()->after('bairro');
+            $table->string('uf', 2)->nullable()->after('cidade');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('clientes', function (Blueprint $table) {
+            $table->dropColumn(['numero', 'complemento', 'bairro', 'cidade', 'uf']);
+        });
+    }
+};
